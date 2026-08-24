@@ -13,7 +13,8 @@
 
 What is the purpose of the neighborhood function in the SOM? How does it change the learning?
 
-**Answer:**
+#### Answer:
+
 The neighborhood function in a Self-Organizing Map (SOM) determines how strongly the neurons around the winning neuron are updated when learning from an input. The winning neuron receives the strongest update, while nearby neurons receive smaller updates.
 
 This helps the SOM organize similar data points close together and preserves the relationships between neighboring neurons. As training progresses, the neighborhood usually becomes smaller, allowing the SOM to move from broad organization to more precise adjustments.
@@ -22,7 +23,8 @@ This helps the SOM organize similar data points close together and preserves the
 
 A simplistic intruder detection system for a computer network consists of an attempt to categorize users according to (i) the time of day they log in, (ii) the length of time they log in for, (iii) the types of programs they run while logged in, (iv) the number of programs they run while logged in. Suggest how you would train a SOM classifier to perform the categorization. What preprocessing of the data would you do, how much data would you need, and how large would you make the SOM? Do you think that such a system would work for intruder detection?
 
-**Answer:**
+#### Answer:
+
 I would first collect normal user activity data over a period of time and represent each login session as a feature vector containing the four variables: time of login, session length, types of programs used, and number of programs run.
 
 Before training the SOM, I would preprocess the data by **normalizing the numerical features** so that variables with larger values do not have more influence than the others. Program types could be converted into numerical or binary features indicating which programs were used.
@@ -37,7 +39,8 @@ I think this system **could help with intruder detection**, but it would not be 
 
 A bank wants to detect fraudulent credit card transactions. They have data for lots and lots of transactions (each transaction is an amount of money, a shop, and the time and date) and some information about when credit cards were stolen, and the transactions that were performed on the stolen card. Describe how you could use a competitive learning method to cluster people's transactions together to identify patterns, so that stolen cards can be detected as changes in pattern. How well do you think this would work? There is much more data of transactions when cards are not stolen, compared to stolen transactions. How does this affect the learning, and what can you do about it?
 
-**Answer:**
+#### Answer:
+
 I would use a competitive learning method such as a **Self-Organizing Map (SOM)** to cluster transactions based on features such as the transaction amount, shop, and time/date. The SOM would learn the normal patterns of transactions for each card or group of similar cards.
 
 Most transactions would be normal, so the SOM would primarily learn what **normal spending behavior** looks like. When a card is stolen, its transactions may suddenly differ from its usual pattern—for example, unusual amounts, unfamiliar shops, or transactions at unusual times. A large change from the learned pattern could then be flagged as possible fraud.
@@ -73,9 +76,9 @@ Initialization - As a first step in finding a sensible initial partition, let th
 
 ---
 
-Answer:
+#### Answer:
 
-## Iteration 1 — Assign each subject to the closest centroid
+#### Iteration 1 — Assign each subject to the closest centroid
 
 We calculate Euclidean distance:
 
@@ -117,7 +120,7 @@ Doing this for all subjects:
 
 > Subject 3 is exactly the same distance from both centroids. Using the usual tie-breaking convention, we assign it to **Group 1**.
 
-### New centroids
+#### New centroids
 
 **Group 1:** Subjects 1, 2, 3
 
@@ -153,7 +156,7 @@ So:
 
 ---
 
-# Iteration 2
+#### Iteration 2
 
 Now use:
 
@@ -179,7 +182,7 @@ So we have:
 - **G1:** Subjects 1, 2
 - **G2:** Subjects 3, 4, 5, 6, 7
 
-### Calculate new centroids
+#### Calculate new centroids
 
 For G1:
 
@@ -211,7 +214,7 @@ B=\frac{4+7+5+5+4.5}{5}=5.1
 
 ---
 
-# Iteration 3
+#### Iteration 3
 
 Now use:
 
@@ -246,9 +249,9 @@ Since the assignments and centroids no longer change, **k-Means has converged**.
 
 ---
 
-### Final Answer
+#### Final Answer
 
-### **Group 1**
+#### **Group 1**
 
 Subjects:
 
@@ -262,7 +265,7 @@ Final centroid:
 \boxed{(1.25,\ 1.50)}
 ]
 
-### **Group 2**
+#### **Group 2**
 
 Subjects:
 
@@ -276,7 +279,7 @@ Final centroid:
 \boxed{(3.90,\ 5.10)}
 ]
 
-### Final clustering
+#### Final clustering
 
 | Group       | Subjects          | Final Centroid   |
 | ----------- | ----------------- | ---------------- |

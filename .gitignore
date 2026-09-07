@@ -36,3 +36,7 @@ htmlcov/
 
 # OS
 .DS_Store
+
+# Project data/models (large/binary, regenerable via src/download_data.py, src/train_classical.py)
+project/data/
+project/models/

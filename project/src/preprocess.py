@@ -12,7 +12,11 @@ RANDOM_STATE = 42
 TEST_SIZE = 0.2
 
 
-def load_and_split():
+def load_raw_and_scaled_split():
+    """Same dedup + stratified split as load_and_split, but also returns the
+    raw (unscaled) train/test features, so downstream steps that need
+    human-readable feature values (e.g. discretizing BMI or GenHlth for a
+    Bayesian network) can line up with the scaled features by index."""
     df = pd.read_csv(DATA_FILE)
     df = df.drop_duplicates().reset_index(drop=True)
 
@@ -27,6 +31,11 @@ def load_and_split():
     X_train_scaled = pd.DataFrame(scaler.fit_transform(X_train), columns=X.columns, index=X_train.index)
     X_test_scaled = pd.DataFrame(scaler.transform(X_test), columns=X.columns, index=X_test.index)
 
+    return X_train, X_test, X_train_scaled, X_test_scaled, y_train, y_test, scaler
+
+
+def load_and_split():
+    _, _, X_train_scaled, X_test_scaled, y_train, y_test, scaler = load_raw_and_scaled_split()
     return X_train_scaled, X_test_scaled, y_train, y_test, scaler
 
 

@@ -1,4 +1,17 @@
 
+
+# CS 582 — Machine Learning: Group Project Report
+
+**Project Title:** Diabetes Risk Prediction: Deep Learning vs. Classical ML with a Bayesian Uncertainty-Aware Triage Agent
+
+**Group:** Group 10
+
+**Group Members:**
+| Group Member |
+| :--- |
+| Jephthah Kimanthi David |
+| Gideon Bamuleseyo |
+
 ## 1. The one-paragraph pitch
 
 Diabetes screening at population scale needs to catch at-risk people without

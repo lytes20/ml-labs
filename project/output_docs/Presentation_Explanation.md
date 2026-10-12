@@ -1,11 +1,3 @@
-# Presentation prep: full project deep-dive
-
-Read this before presenting. It's organized so you can skim top-to-bottom for the
-full story, then jump to **Anticipated questions** or the **Glossary** if you get
-put on the spot. Every number here is pulled directly from the actual run outputs
-in `results/` — nothing is estimated or rounded from memory.
-
----
 
 ## 1. The one-paragraph pitch
 
@@ -256,18 +248,17 @@ at-risk" ones). That's also a reasonable bias for a screening tool: better to
 escalate an ambiguous case than to auto-clear or auto-diagnose it with false
 confidence.
 
-### 8.1 A design pivot worth mentioning if asked about your process
+### 8.1 A design pivot
 
-The first version of the triage agent didn't use probability bands — it used the
+- The first version of the triage agent didn't use probability bands — it used the
 BN's *entropy* directly (escalate the highest-entropy 25% of cases, then split the
 rest at posterior ≥ 0.5 for auto-flag vs. auto-clear). That produced a broken
 result: only **11 out of 45,895** cases (0.02%) landed in auto-flag. The reason:
 entropy is maximal at p=0.5 and falls off symmetrically, so requiring *both*
 p ≥ 0.5 *and* low entropy demands the posterior get all the way up near ~0.7+ —
 and with only 5 modestly predictive evidence variables and BDeu smoothing pulling
-posteriors toward the 15.3% base rate, very few cases ever get that high. Switching
-to direct probability bands (fixed low/high cutoffs around the prevalence, entropy
-kept only as a reported diagnostic) fixed this and produced the well-populated,
+posteriors toward the 15.3% base rate, very few cases ever get that high. 
+- Switching to direct probability bands (fixed low/high cutoffs around the prevalence, entropy kept only as a reported diagnostic) fixed this and produced the well-populated,
 well-stratified three-tier split shown above. This is a good story for "what did
 you learn/change during the project" — it shows the first uncertainty-routing
 design was theoretically clean but practically useless, and the fix required
@@ -298,22 +289,7 @@ pure accuracy metric can't show you.
 
 ---
 
-## 10. Numbers to have memorized
-
-- Dataset: **253,680** records → **229,474** after dedup → **183,579** train /
-  **45,895** test
-- Class balance: **84.7% / 15.3%** (train)
-- Best AUC: DNN **0.819**, essentially tied with Random Forest **0.817**
-- Base model for uncertainty layer: **Random Forest**
-- Triage split: **44.0% auto-clear / 39.9% escalate / 16.2% auto-flag**
-- Automation rate: **60.2%**
-- Auto-clear FN rate: **4.3%** (vs. 15.3% base rate — under a third)
-- Auto-flag precision: **41.5%** (2.7x base rate)
-- Automation knee point: **~60–62%**
-
----
-
-## 11. The reference papers
+## 10. The reference papers
 
 1. **Sharma & Shah (2021)**, *A comprehensive review of machine learning
    techniques on diabetes detection* — a survey paper, cited for general framing
@@ -336,89 +312,7 @@ pure accuracy metric can't show you.
 
 ---
 
-## 12. Anticipated questions
-
-**Q: Why not use SMOTE or another resampling technique for the class imbalance
-instead of `class_weight="balanced"` / `pos_weight`?**
-A: Class weighting reweights the loss function without synthesizing or discarding
-any data — it's simpler, doesn't risk generating unrealistic synthetic minority
-samples (a known SMOTE failure mode on datasets with many categorical/ordinal
-features, which is most of this dataset), and scales trivially to 183k rows. It's
-also the more standard first choice; SMOTE would be a reasonable ablation for
-future work.
-
-**Q: Since the DNN has the best AUC, why build the uncertainty layer on Random
-Forest instead?**
-A: AUC is a tie for practical purposes (0.819 vs. 0.817); Random Forest wins on
-F1, accuracy, and training/inference cost by a wide margin. Building on the DNN
-would also change the shape of the uncertainty layer (probabilities from a neural
-net vs. a tree ensemble calibrate differently) without a clear performance
-justification. This was a deliberate, defensible pick, not an oversight.
-
-**Q: The naive-Bayes-style structure assumes the five evidence variables are
-conditionally independent given the label — isn't that unrealistic (e.g., BMI and
-GenHlth are surely correlated)?**
-A: Yes, and that's an acknowledged simplification, not an oversight. It keeps the
-network small enough to fit and query exactly with limited data per parameter
-combination. A structure-learning step (e.g., hill-climbing search in `pgmpy`)
-could relax this, at the cost of more parameters to estimate reliably and a real
-risk of overfitting the *structure* itself without a validation procedure for it —
-listed explicitly as future work.
-
-**Q: How did you pick the 8%/35% triage thresholds — aren't they just tuned to
-look good on the test set?**
-A: They were chosen by inspecting the tier-size/error-rate tradeoff directly (the
-same sweep behind the tradeoff chart), aiming for tiers that are both
-meaningfully sized and well-stratified rather than fit to a single metric. It's a
-fair critique that a fully rigorous version would tune these on a held-out
-validation split, not the test set, before final reporting — noted as a limitation.
-
-**Q: What's the difference between the uncertainty this Bayesian network gives you
-and just using Random Forest's raw predicted probability directly?**
-A: RF's own probability comes from one model's internal vote fraction, which is
-known to be poorly calibrated (tree ensembles tend to be overconfident away from
-0.5). The BN treats that probability as *one input among several independent
-signals* and produces a posterior that's explicitly shaped by a smoothed,
-count-based estimate of how those signals jointly relate to the true label in the
-training data — closer to a calibration/re-weighting step than a second opinion
-from scratch.
-
-**Q: Could you deploy this in a real clinic?**
-A: Not without more work: the thresholds need tuning against a real
-review-capacity constraint and cost function (a missed diagnosis is not
-equally costly to a false alarm), the network's evidence variables should be
-validated against clinical guidance rather than picked purely by correlation
-strength, and the model needs recalibration if used on a different population than
-BRFSS 2015 respondents. This is a research prototype demonstrating the approach,
-not a validated clinical tool.
-
-**Q: What's the actual novelty here, beyond combining two papers?**
-A: See Section 12 of `ANALYSIS.md` / slide 12 — three claims: (1) cross-domain
-adaptation of Akram et al.'s image-based Bayesian uncertainty pattern to tabular
-data with a classical base model; (2) the hybrid evidence-fusion design, using the
-BN as a calibration layer over a black-box model rather than as the classifier
-itself; (3) the triage agent as an autonomous decision policy — it doesn't just
-predict, it decides whether to act or defer, which is the "agentic" contribution
-the course rubric specifically calls out.
-
-**Q: Why entropy and not some other uncertainty measure (e.g., variance,
-confidence intervals)?**
-A: Entropy is the natural uncertainty measure for a discrete/binary posterior — it
-requires no distributional assumptions beyond the Bernoulli outcome itself, and
-it's bounded and interpretable (0 to 1 bit). Variance-based measures are more
-natural for continuous outputs or for ensembles where you have multiple posterior
-samples to compute variance over; we have a single closed-form posterior per case
-from exact inference, so entropy is the more direct fit.
-
-**Q: Is there any data leakage in this pipeline?**
-A: No — `StandardScaler` is fit on train only, the Bayesian network's CPDs are fit
-on train-set predictions/labels only, and all reported metrics (tier breakdown,
-tradeoff sweep) are computed on the held-out test set using a model/network that
-never saw those rows during fitting.
-
----
-
-## 13. Glossary
+## 11. Glossary
 
 - **AUC (Area Under the ROC Curve):** probability that a random positive example
   is ranked higher (by predicted score) than a random negative example. 0.5 =
